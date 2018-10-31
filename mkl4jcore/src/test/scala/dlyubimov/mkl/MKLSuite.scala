@@ -1,6 +1,6 @@
 package dlyubimov.mkl
 
-import java.nio.{ByteBuffer, DoubleBuffer, IntBuffer}
+import java.nio.{ByteBuffer, ByteOrder, DoubleBuffer, IntBuffer}
 
 import dlyubimov.mkl.javacpp.MKL
 import org.bytedeco.javacpp.{BytePointer, DoublePointer, IntPointer}
@@ -83,6 +83,8 @@ class MKLSuite extends FreeSpec with Matchers {
 
       arrA.put(0, a)
       arrB.put(0, b)
+      arrA.get should be (a)
+      arrB.get should be (b)
 
       MKL.dgemm(
         "N", "N",
@@ -147,6 +149,86 @@ class MKLSuite extends FreeSpec with Matchers {
       // Fail
       arrC.get(0) should be(a * b)
     }
+
+    "dgemm direct buf" in {
+      val a = 5
+      val b = 4
+
+      val arrA = ByteBuffer.allocateDirect(80).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+      val arrB = ByteBuffer.allocateDirect(80).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+      val arrC = ByteBuffer.allocateDirect(80).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+      //      val arrC = DoubleBuffer.allocate(30)
+
+      arrA.put(0, a)
+      arrB.put(0, b)
+
+      MKL.dgemm(
+        "N", "N",
+        1, 1, 1,
+        1.0,
+        arrA, 1,
+        arrB, 1,
+        0d,
+        arrC, 1
+      )
+
+      arrC.get(0) should be(a * b)
+    }
+
+    "dgemm direct buf with offset by asDoubleBuffer" in {
+      val a = 5
+      val b = 4
+
+      val arrA = ByteBuffer.allocateDirect(80).position(5).asInstanceOf[ByteBuffer]
+        .order(ByteOrder.nativeOrder()).asDoubleBuffer()
+      val arrB = ByteBuffer.allocateDirect(80).position(7).asInstanceOf[ByteBuffer]
+        .order(ByteOrder.nativeOrder()).asDoubleBuffer()
+      val arrC = ByteBuffer.allocateDirect(80).position(0).asInstanceOf[ByteBuffer]
+        .order(ByteOrder.nativeOrder()).asDoubleBuffer()
+
+      arrA.put(0, a)
+      arrB.put(0, b)
+
+      MKL.dgemm(
+        "N", "N",
+        1, 1, 1,
+        1.0,
+        arrA, 1,
+        arrB, 1,
+        0d,
+        arrC, 1
+      )
+
+      arrC.get(0) should be(a * b)
+    }
+
+    "dgemm direct buf with offset by slice" in {
+      val a = 5
+      val b = 4
+
+      val arrA = ByteBuffer.allocateDirect(80).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+        .position(5).asInstanceOf[DoubleBuffer].slice
+      val arrB = ByteBuffer.allocateDirect(80).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+        .position(5).asInstanceOf[DoubleBuffer].slice
+      val arrC = ByteBuffer.allocateDirect(80).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+        .position(5).asInstanceOf[DoubleBuffer].slice
+
+      arrA.put(0, a)
+      arrB.put(0, b)
+
+      MKL.dgemm(
+        "N", "N",
+        1, 1, 1,
+        1.0,
+        arrA, 1,
+        arrB, 1,
+        0d,
+        arrC, 1
+      )
+
+      arrC.get(0) should be(a * b)
+    }
+
   }
 
 
