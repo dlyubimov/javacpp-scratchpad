@@ -1,0 +1,10 @@
+.checkstyle
+.ruleset
+.pmd
+.classpath
+.project
+.settings/
+.idea/
+.cache
+*.iml
+target/

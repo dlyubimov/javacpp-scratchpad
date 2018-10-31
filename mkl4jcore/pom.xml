@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>mkl4j</artifactId>
+    <groupId>mkl4j</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>mkl4j-core</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>mkl4j</groupId>
+      <artifactId>mkl4j-jcpp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/javacpp</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.bytedeco</groupId>
+        <artifactId>javacpp</artifactId>
+        <version>${javacpp.version}</version>
+        <executions>
+
+          <execution>
+            <id>javacpp-parse</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <classPaths>
+                <classPath>${project.build.outputDirectory}</classPath>
+                <classPath>${org.scala-lang:scala-library:jar}</classPath>
+                <classPath>${mkl4j:mkl4j-jcpp:jar}</classPath>
+              </classPaths>
+              <outputDirectory>${project.build.directory}/generated-sources/javacpp</outputDirectory>
+              <includePaths>
+                <includePath>${env.MKLROOT}/include</includePath>
+              </includePaths>
+              <classOrPackageNames>
+                <classOrPackageName>dlyubimov.mkl.javacpp.MKLInfoMapper</classOrPackageName>
+              </classOrPackageNames>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>javacpp-compile</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <classPaths>
+                <classPath>${project.build.outputDirectory}</classPath>
+                <classPath>${mkl4j:mkl4j-jcpp:jar}</classPath>
+                <classPath>${org.scala-lang:scala-library:jar}</classPath>
+              </classPaths>
+              <includePaths>
+                <includePath>${env.MKLROOT}/include</includePath>
+              </includePaths>
+              <linkPaths>
+                <linkPath>${env.MKLROOT}/lib/intel64</linkPath>
+              </linkPaths>
+              <deleteJniFiles>false</deleteJniFiles>
+              <classOrPackageNames>
+                <classOrPackageName>dlyubimov.mkl.javacpp.MKL</classOrPackageName>
+             </classOrPackageNames>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

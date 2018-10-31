@@ -1,0 +1,1 @@
+JavaCPP test scratchpad.
